@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1117">
+<title>Arun's Simple Morning Workout</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%230d1117'/><rect width='512' height='512' rx='110' fill='%233fb950' opacity='0.15'/><text x='145' y='310' font-family='Georgia,serif' font-size='200' font-weight='700' fill='%23e6edf3'>A</text><polygon points='340,80 295,260 325,260 270,430 370,220 335,220 385,80' fill='%233fb950'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%230d1117'/><rect width='512' height='512' rx='110' fill='%233fb950' opacity='0.15'/><text x='145' y='310' font-family='Georgia,serif' font-size='200' font-weight='700' fill='%23e6edf3'>A</text><polygon points='340,80 295,260 325,260 270,430 370,220 335,220 385,80' fill='%233fb950'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --accent: #3fb950;
+    --accent-dim: rgba(63,185,80,0.12);
+    --accent-glow: rgba(63,185,80,0.25);
+    --amber: #d29922;
+    --amber-dim: rgba(210,153,34,0.12);
+    --blue: #58a6ff;
+    --blue-dim: rgba(88,166,255,0.1);
+    --red: #f85149;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .app {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    padding: 56px 24px 20px;
+    position: relative;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .app-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .app-title {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .date-display {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* Streak card */
+  .streak-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 0 24px 24px;
+  }
+
+  .streak-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .streak-card.highlight {
+    background: var(--accent-dim);
+    border-color: rgba(63,185,80,0.25);
+  }
+
+  .streak-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .streak-card:not(.highlight) .streak-num {
+    color: var(--text);
+  }
+
+  .streak-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    padding: 0 24px 20px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-pct {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .progress-count {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  /* Task list */
+  .task-section {
+    padding: 0 16px;
+    flex: 1;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 10px;
+  }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .task-item {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .task-item:active { transform: scale(0.985); }
+
+  .task-item.done {
+    background: var(--accent-dim);
+    border-color: rgba(63,185,80,0.2);
+  }
+
+  .check-ring {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  .task-item.done .check-ring {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkmark {
+    width: 6px;
+    height: 10px;
+    border: 2px solid #0d1117;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .task-item.done .checkmark { opacity: 1; }
+
+  .task-info { flex: 1; min-width: 0; }
+
+  .task-name {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .task-item.done .task-name {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(255,255,255,0.2);
+  }
+
+  .task-reps {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .task-item.done .task-reps { color: var(--accent); }
+
+  /* Add task form */
+  .add-section {
+    padding: 20px 16px;
+  }
+
+  .add-form {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: -4px;
+  }
+
+  .form-row { display: flex; gap: 10px; }
+
+  input[type="text"], input[type="number"] {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus { border-color: var(--border2); }
+  input::placeholder { color: var(--muted); }
+
+  .add-btn {
+    background: var(--accent);
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .add-btn:active { transform: scale(0.97); opacity: 0.85; }
+
+  /* Bottom bar */
+  .bottom-bar {
+    padding: 16px 24px 36px;
+    display: flex;
+    gap: 10px;
+    border-top: 0.5px solid var(--border);
+    background: var(--bg);
+  }
+
+  .reset-btn {
+    flex: 1;
+    background: transparent;
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .reset-btn:active { background: var(--surface2); color: var(--text); }
+
+  /* All done banner */
+  .done-banner {
+    display: none;
+    margin: 0 16px 12px;
+    background: var(--accent-dim);
+    border: 0.5px solid rgba(63,185,80,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .done-banner.visible { display: block; }
+
+  .done-banner-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  .done-banner-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  /* History dots */
+  .history-row {
+    display: flex;
+    gap: 5px;
+    padding: 0 24px 20px;
+    align-items: center;
+  }
+
+  .history-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .history-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 4px var(--accent-glow); }
+  .history-dot.today { border-color: var(--blue); background: var(--blue-dim); }
+  .history-dot.today.filled { background: var(--accent); border-color: var(--accent); }
+
+  .history-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: 6px;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="app-label">Daily routine</div>
+        <div class="app-title">Arun's simple morning workout</div>
+      </div>
+      <div class="date-display" id="dateDisplay"></div>
+    </div>
+  </div>
+
+  <div class="streak-row">
+    <div class="streak-card highlight">
+      <div class="streak-num" id="streakNum">0</div>
+      <div class="streak-label">Streak</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-num" id="bestNum">0</div>
+      <div class="streak-label">Best</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-num" id="totalNum">0</div>
+      <div class="streak-label">Total days</div>
+    </div>
+  </div>
+
+  <div class="history-row">
+    <div id="historyDots"></div>
+    <span class="history-label">last 14 days</span>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span class="progress-pct" id="progressPct">0%</span>
+      <span class="progress-count" id="progressCount">0 of 6 done</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="done-banner" id="doneBanner">
+    <div class="done-banner-title">All done! Streak extended.</div>
+    <div class="done-banner-sub" id="doneBannerSub"></div>
+  </div>
+
+  <div class="task-section">
+    <div class="section-label">Exercises</div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <div class="add-section">
+    <div class="add-form">
+      <div class="form-label">Add exercise</div>
+      <div class="form-row">
+        <input type="text" id="newName" placeholder="Exercise name" />
+        <input type="number" id="newReps" placeholder="Reps" min="1" style="width:90px;flex-shrink:0" />
+        <button class="add-btn" onclick="addTask()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="reset-btn" onclick="resetToday()">Reset today</button>
+    <button class="reset-btn" onclick="clearStreak()" style="color:var(--red);border-color:rgba(248,81,73,0.25)">Clear streak</button>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'morning-routine-v2';
+
+const DEFAULT_TASKS = [
+  { id: 1, name: 'Pushups',      reps: 10, unit: 'reps' },
+  { id: 2, name: 'Squats',       reps: 20, unit: 'reps' },
+  { id: 3, name: 'Wall sit',     reps: 30, unit: 'secs' },
+  { id: 4, name: 'Uplift',       reps: 10, unit: 'reps' },
+  { id: 5, name: 'Twist',        reps: 20, unit: 'reps' },
+  { id: 6, name: 'Baby stretch', reps: 10, unit: 'reps' },
+];
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    tasks: DEFAULT_TASKS.map(t => ({...t})),
+    todayDone: {},
+    completedDays: [],
+    streak: 0,
+    best: 0,
+    lastCompleteDay: null,
+    nextId: 10,
+  };
+}
+
+function saveState(s) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
+}
+
+let state = loadState();
+
+// Reset today's checks if it's a new day
+const today = todayStr();
+if (state.lastResetDay !== today) {
+  state.todayDone = {};
+  state.lastResetDay = today;
+  saveState(state);
+}
+
+function toggleTask(id) {
+  if (state.todayDone[id]) {
+    delete state.todayDone[id];
+  } else {
+    state.todayDone[id] = true;
+  }
+  // Check if all done
+  const allDone = state.tasks.length > 0 && state.tasks.every(t => state.todayDone[t.id]);
+  if (allDone && state.lastCompleteDay !== today) {
+    state.lastCompleteDay = today;
+    if (!state.completedDays.includes(today)) {
+      state.completedDays.push(today);
+    }
+    recalcStreak();
+  }
+  saveState(state);
+  render();
+}
+
+function recalcStreak() {
+  const days = [...state.completedDays].sort();
+  if (!days.length) { state.streak = 0; return; }
+  let streak = 1;
+  const todayD = new Date(today);
+  // Check streak going backwards from today
+  for (let i = 1; i <= 365; i++) {
+    const d = new Date(todayD);
+    d.setDate(d.getDate() - i);
+    const s = d.toISOString().slice(0,10);
+    if (days.includes(s)) { streak++; } else { break; }
+  }
+  state.streak = streak;
+  if (streak > (state.best || 0)) state.best = streak;
+}
+
+function addTask() {
+  const name = document.getElementById('newName').value.trim();
+  const reps = parseInt(document.getElementById('newReps').value) || 10;
+  if (!name) { document.getElementById('newName').focus(); return; }
+  const id = state.nextId++;
+  state.tasks.push({ id, name, reps, unit: 'reps' });
+  document.getElementById('newName').value = '';
+  document.getElementById('newReps').value = '';
+  saveState(state);
+  render();
+}
+
+function resetToday() {
+  state.todayDone = {};
+  // Remove today from completedDays if present
+  state.completedDays = state.completedDays.filter(d => d !== today);
+  state.lastCompleteDay = null;
+  recalcStreak();
+  saveState(state);
+  render();
+}
+
+function clearStreak() {
+  if (!confirm('Clear all streak data?')) return;
+  state.streak = 0;
+  state.best = 0;
+  state.completedDays = [];
+  state.lastCompleteDay = null;
+  state.todayDone = {};
+  saveState(state);
+  render();
+}
+
+function render() {
+  const done = state.tasks.filter(t => state.todayDone[t.id]).length;
+  const total = state.tasks.length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const allDone = done === total && total > 0;
+
+  // Date
+  const now = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateDisplay').innerHTML =
+    days[now.getDay()] + '<br>' + months[now.getMonth()] + ' ' + now.getDate();
+
+  // Stats
+  document.getElementById('streakNum').textContent = state.streak || 0;
+  document.getElementById('bestNum').textContent = state.best || 0;
+  document.getElementById('totalNum').textContent = state.completedDays.length;
+
+  // Progress
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressCount').textContent = done + ' of ' + total + ' done';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Done banner
+  const banner = document.getElementById('doneBanner');
+  if (allDone) {
+    banner.classList.add('visible');
+    document.getElementById('doneBannerSub').textContent =
+      state.streak > 1 ? state.streak + ' day streak — keep it going!' : 'Day 1 — great start!';
+  } else {
+    banner.classList.remove('visible');
+  }
+
+  // History dots (last 14 days)
+  const dotsEl = document.getElementById('historyDots');
+  dotsEl.style.display = 'flex';
+  dotsEl.style.gap = '5px';
+  let dotsHtml = '';
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    const isToday = ds === today;
+    const filled = state.completedDays.includes(ds);
+    dotsHtml += `<div class="history-dot${filled?' filled':''}${isToday?' today':''}"></div>`;
+  }
+  dotsEl.innerHTML = dotsHtml;
+
+  // Task list
+  const list = document.getElementById('taskList');
+  list.innerHTML = state.tasks.map(t => {
+    const isDone = !!state.todayDone[t.id];
+    return `<div class="task-item${isDone?' done':''}" onclick="toggleTask(${t.id})">
+      <div class="check-ring"><div class="checkmark"></div></div>
+      <div class="task-info">
+        <div class="task-name">${t.name}</div>
+        <div class="task-reps">${t.reps} ${t.unit}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
